@@ -103,4 +103,22 @@ Layer y=0 is the top of the structure and the pattern runs x rows of z character
 
 ## Pech trades
 
-The pech trade tables are a registry too (`thaumaturge:pech_trade`), server side only. Same `.json()` pattern; crib the format from the mod jar.
+Each pech type has one trade table: `thaumaturge:forager`, `thaumaturge:mage` and `thaumaturge:stalker`. A trade is a result item and a tier from 1 to 5. Higher tiers unlock as a player keeps trading with pechs.
+
+You change pech trades by defining the same table id again, which replaces the whole table. So start from the mod's list and edit it:
+
+```js
+ServerEvents.registry('thaumaturge:pech_trade', event => {
+    event.create('thaumaturge:forager').json({
+        trades: [
+            { result: { id: 'thaumaturge:cluster_iron' }, tier: 1 },
+            { result: { id: 'thaumaturge:cluster_gold' }, tier: 1 },
+            { result: { id: 'minecraft:blaze_rod' }, tier: 2 },
+            { result: { id: 'mypack:frost_shard', count: 3 }, tier: 3 },
+            { result: { id: 'minecraft:diamond' }, tier: 5 }
+        ]
+    })
+})
+```
+
+Results take an optional `count` and an optional `components` block, so enchanted books and potions work as trade goods. The mod's full tables are in its jar under `data/thaumaturge/thaumaturge/pech_trade/` if you want the complete starting point.
