@@ -1,0 +1,142 @@
+package com.leclowndu93150.kubejs_thaumaturge;
+
+import com.leclowndu93150.kubejs_thaumaturge.binding.AspectPoolsWrapper;
+import com.leclowndu93150.kubejs_thaumaturge.binding.DataMapsWrapper;
+import com.leclowndu93150.kubejs_thaumaturge.builder.GolemAddonBuilder;
+import com.leclowndu93150.kubejs_thaumaturge.builder.GolemArmBuilder;
+import com.leclowndu93150.kubejs_thaumaturge.builder.GolemHeadBuilder;
+import com.leclowndu93150.kubejs_thaumaturge.builder.GolemLegBuilder;
+import com.leclowndu93150.kubejs_thaumaturge.builder.GolemMaterialBuilder;
+import com.leclowndu93150.kubejs_thaumaturge.builder.GolemTraitBuilder;
+import com.leclowndu93150.kubejs_thaumaturge.builder.JarBlockBuilder;
+import com.leclowndu93150.kubejs_thaumaturge.builder.WandCapBuilder;
+import com.leclowndu93150.kubejs_thaumaturge.builder.WandCapItemBuilder;
+import com.leclowndu93150.kubejs_thaumaturge.builder.WandRodBuilder;
+import com.leclowndu93150.kubejs_thaumaturge.builder.WandRodItemBuilder;
+import com.leclowndu93150.kubejs_thaumaturge.event.ThaumaturgeEvents;
+import com.leclowndu93150.kubejs_thaumaturge.recipe.ThaumaturgeRecipeComponents;
+import com.leclowndu93150.kubejs_thaumaturge.recipe.ThaumaturgeRecipeSchemas;
+import com.leclowndu93150.thaumaturge.TCIds;
+import com.leclowndu93150.thaumaturge.api.aspect.AspectDataMaps;
+import com.leclowndu93150.thaumaturge.api.aspect.AspectIndexAccess;
+import com.leclowndu93150.thaumaturge.api.aspect.AspectList;
+import com.leclowndu93150.thaumaturge.api.aspect.IAspect;
+import com.leclowndu93150.thaumaturge.api.aura.AuraHelper;
+import com.leclowndu93150.thaumaturge.api.capability.KnowledgeAccess;
+import com.leclowndu93150.thaumaturge.api.recipe.Blueprint;
+import com.leclowndu93150.thaumaturge.api.research.IResearchCategory;
+import com.leclowndu93150.thaumaturge.api.research.IResearchEntry;
+import com.leclowndu93150.thaumaturge.api.research.scan.ScanEntry;
+import com.leclowndu93150.thaumaturge.api.taint.TaintApi;
+import com.leclowndu93150.thaumaturge.api.wands.WandAccess;
+import com.leclowndu93150.thaumaturge.api.warp.WarpHelper;
+import com.leclowndu93150.thaumaturge.content.aspect.Aspect;
+import com.leclowndu93150.thaumaturge.content.research.ResearchCategory;
+import com.leclowndu93150.thaumaturge.content.research.ResearchEntry;
+import dev.latvian.mods.kubejs.event.EventGroupRegistry;
+import dev.latvian.mods.kubejs.plugin.KubeJSPlugin;
+import dev.latvian.mods.kubejs.recipe.component.RecipeComponentTypeRegistry;
+import dev.latvian.mods.kubejs.recipe.schema.RecipeSchemaRegistry;
+import dev.latvian.mods.kubejs.registry.BuilderTypeRegistry;
+import dev.latvian.mods.kubejs.registry.ServerRegistryRegistry;
+import dev.latvian.mods.kubejs.script.BindingRegistry;
+import dev.latvian.mods.kubejs.script.TypeWrapperRegistry;
+import dev.latvian.mods.rhino.type.TypeInfo;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
+
+public class ThaumaturgeKubeJSPlugin implements KubeJSPlugin {
+    @Override
+    public void registerBuilderTypes(BuilderTypeRegistry registry) {
+        registry.addDefault(WandCapBuilder.REGISTRY, WandCapBuilder.class, WandCapBuilder::new);
+        registry.addDefault(WandRodBuilder.REGISTRY, WandRodBuilder.class, WandRodBuilder::new);
+        registry.addDefault(GolemTraitBuilder.REGISTRY, GolemTraitBuilder.class, GolemTraitBuilder::new);
+        registry.addDefault(GolemMaterialBuilder.REGISTRY, GolemMaterialBuilder.class, GolemMaterialBuilder::new);
+        registry.addDefault(GolemHeadBuilder.REGISTRY, GolemHeadBuilder.class, GolemHeadBuilder::new);
+        registry.addDefault(GolemArmBuilder.REGISTRY, GolemArmBuilder.class, GolemArmBuilder::new);
+        registry.addDefault(GolemLegBuilder.REGISTRY, GolemLegBuilder.class, GolemLegBuilder::new);
+        registry.addDefault(GolemAddonBuilder.REGISTRY, GolemAddonBuilder.class, GolemAddonBuilder::new);
+        registry.of(
+                Registries.BLOCK,
+                reg -> reg.add(
+                        Identifier.fromNamespaceAndPath("thaumaturge", "jar"),
+                        JarBlockBuilder.class,
+                        JarBlockBuilder::new));
+        registry.of(Registries.ITEM, reg -> {
+            reg.add(
+                    Identifier.fromNamespaceAndPath("thaumaturge", "wand_cap"),
+                    WandCapItemBuilder.class,
+                    WandCapItemBuilder::new);
+            reg.add(
+                    Identifier.fromNamespaceAndPath("thaumaturge", "wand_rod"),
+                    WandRodItemBuilder.class,
+                    WandRodItemBuilder::new);
+        });
+    }
+
+    @Override
+    public void registerServerRegistries(ServerRegistryRegistry registry) {
+        registry.register(IAspect.REGISTRY_KEY, Aspect.CODEC, IAspect.class);
+        registry.register(IResearchCategory.REGISTRY_KEY, ResearchCategory.CODEC, IResearchCategory.class);
+        registry.register(IResearchEntry.REGISTRY_KEY, ResearchEntry.CODEC, IResearchEntry.class);
+        registry.register(ScanEntry.REGISTRY_KEY, ScanEntry.CODEC, ScanEntry.class);
+        registry.register(Blueprint.REGISTRY_KEY, Blueprint.CODEC, Blueprint.class);
+    }
+
+    @Override
+    public void registerRecipeComponents(RecipeComponentTypeRegistry registry) {
+        registry.unit(ThaumaturgeRecipeComponents.ASPECT_LIST);
+        registry.unit(ThaumaturgeRecipeComponents.ITEM_STACK_TEMPLATE);
+        registry.unit(ThaumaturgeRecipeComponents.RESEARCH_GATE);
+        registry.unit(ThaumaturgeRecipeComponents.COMPONENT_PATCH);
+    }
+
+    @Override
+    public void registerRecipeSchemas(RecipeSchemaRegistry registry) {
+        registry.register(TCIds.rl("crucible"), ThaumaturgeRecipeSchemas.CRUCIBLE);
+        registry.register(TCIds.rl("infusion"), ThaumaturgeRecipeSchemas.INFUSION);
+        registry.register(TCIds.rl("infusion_enchantment"), ThaumaturgeRecipeSchemas.INFUSION_ENCHANTMENT);
+        registry.register(TCIds.rl("arcane_workbench_shapeless"), ThaumaturgeRecipeSchemas.ARCANE_SHAPELESS);
+        registry.register(TCIds.rl("arcane_workbench_shaped"), ThaumaturgeRecipeSchemas.ARCANE_SHAPED);
+        registry.register(TCIds.rl("infusion_patch"), ThaumaturgeRecipeSchemas.INFUSION_PATCH);
+        registry.register(TCIds.rl("dust_trigger_simple"), ThaumaturgeRecipeSchemas.DUST_TRIGGER_SIMPLE);
+        registry.register(TCIds.rl("dust_trigger_tag"), ThaumaturgeRecipeSchemas.DUST_TRIGGER_TAG);
+        registry.register(TCIds.rl("dust_trigger_multiblock"), ThaumaturgeRecipeSchemas.DUST_TRIGGER_MULTIBLOCK);
+    }
+
+    @Override
+    public void registerTypeWrappers(TypeWrapperRegistry registry) {
+        registry.registerCodec(AspectList.class, AspectList.CODEC);
+        registry.register(
+                ItemStackTemplate.class, (TypeWrapperRegistry.ContextFromFunction<ItemStackTemplate>) (cx, o) -> {
+                    if (o instanceof ItemStackTemplate template) {
+                        return template;
+                    }
+                    ItemStack stack = (ItemStack) cx.jsToJava(o, TypeInfo.of(ItemStack.class));
+                    if (stack == null || stack.isEmpty()) {
+                        return null;
+                    }
+                    return new ItemStackTemplate(stack.typeHolder(), stack.getCount(), stack.getComponentsPatch());
+                });
+    }
+
+    @Override
+    public void registerEvents(EventGroupRegistry registry) {
+        registry.register(ThaumaturgeEvents.GROUP);
+    }
+
+    @Override
+    public void registerBindings(BindingRegistry bindings) {
+        bindings.add("Aura", AuraHelper.class);
+        bindings.add("Warp", WarpHelper.class);
+        bindings.add("Taint", TaintApi.class);
+        bindings.add("Aspects", AspectIndexAccess.class);
+        bindings.add("AspectPools", AspectPoolsWrapper.class);
+        bindings.add("AspectDataMaps", AspectDataMaps.class);
+        bindings.add("ThaumaturgeData", DataMapsWrapper.class);
+        bindings.add("Knowledge", KnowledgeAccess.class);
+        bindings.add("WandVis", WandAccess.class);
+    }
+}
