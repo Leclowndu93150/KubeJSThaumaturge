@@ -32,17 +32,11 @@ The easiest way to make them is to copy `jar_top.png` and `jar_side.png` from th
 | `.topTexture(id)` | normal jar top | The lid |
 | `.bottomTexture(id)` | normal jar bottom | Usually fine to leave alone |
 
-All the normal KubeJS block builder methods work too (`displayName`, `hardness`, `tags`, and so on). Block properties are copied from the real jar by default, so it breaks and sounds like one.
+All the normal KubeJS block builder methods work too (`displayName`, `tags`, and so on). The jar breaks and sounds like the real one unless you change that.
 
 ## What you get for free
 
-The jar builder wires the whole stack:
-
-- A block entity that stores essentia and talks to tubes and bellows
-- The fluid fill renderer, in world and in the item icon
-- A proper `JarItem`, so phials and labels interact with it
-- Jade tooltip showing contents against your capacity
-- Blockstate, model, item model and loot table, all generated
+Your jar behaves exactly like the normal warded jar. Tubes and bellows connect to it, phials fill from it, labels stick to it, Jade shows the contents against your capacity, and it drops itself when broken. The only differences are the ones you chose: the textures and the capacity.
 
 ## Capacity and the fill line
 

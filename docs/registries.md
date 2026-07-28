@@ -15,7 +15,7 @@ ServerEvents.registry('thaumaturge:aspect', event => {
 })
 ```
 
-Compound aspects reference other aspects as their two components. Those go through the data generator instead, because the file is then read by the normal registry loader and the references resolve fine:
+Compound aspects reference two other aspects as components. Those need the second form below, the registry event runs too early for them:
 
 ```js
 ServerEvents.generateData('before_mods', event => {

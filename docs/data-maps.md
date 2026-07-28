@@ -1,6 +1,6 @@
 # Item and entity aspects
 
-Which aspects an item or mob carries is a NeoForge data map, not code. The addon ships helpers that write the data map files for you.
+Every item and mob can carry aspects. Two helpers set them from a script.
 
 ## Items
 

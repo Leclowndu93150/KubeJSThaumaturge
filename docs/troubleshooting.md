@@ -14,7 +14,7 @@ Watch the log during `/reload`. Every broken recipe prints a `Failed to create` 
 
 ## My compound aspect fails with "Failed to get element"
 
-Aspects with components cannot go through `ServerEvents.registry`, because KubeJS validates them before the aspect registry loads. Use `ThaumaturgeData.aspect` inside `generateData` instead. The [Registries](registries.md) page shows both paths.
+Aspects with components cannot go through `ServerEvents.registry`. Use `ThaumaturgeData.aspect` inside `generateData` instead. The [Registries](registries.md) page shows both paths.
 
 ## Names show up as raw keys like golem.material.mypack.diamond
 

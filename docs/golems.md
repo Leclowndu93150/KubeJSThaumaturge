@@ -26,7 +26,7 @@ Body texture goes at:
 kubejs/assets/mypack/textures/entity/golems/mat_diamond.png
 ```
 
-Copy `mat_iron.png` from the mod and recolor it. Part models sample this texture for their material sections, so arms and legs on a diamond golem render diamond as well.
+Copy `mat_iron.png` from the mod and recolor it. Arms, legs and heads pick up the material color on their own, so the whole golem reads as diamond, not just the body.
 
 ## Material methods
 
@@ -58,7 +58,7 @@ StartupEvents.registry('thaumaturge:golem_head', event => {
 })
 ```
 
-`component(item)` adds a fixed crafting component. `materialBase()` and `materialMechanism()` add placeholders that resolve to whatever material the golem is built from, the same trick the mod's own parts use.
+`component(item)` adds a fixed crafting component. `materialBase()` and `materialMechanism()` add slots that cost whatever the golem's material uses, so an iron golem pays iron plates and a diamond one pays diamonds.
 
 Parts can reuse an existing model with `.model(id)` and `.modelTexture(id)`, or skip the model entirely and be stat only. Registries: `thaumaturge:golem_head`, `thaumaturge:golem_arm`, `thaumaturge:golem_leg`, `thaumaturge:golem_addon`.
 
