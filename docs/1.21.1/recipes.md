@@ -79,6 +79,8 @@ event.recipes.thaumaturge.arcane_workbench_shapeless(
 )
 ```
 
+Both take an optional `.group('mypack:lanterns')` to group recipes in the recipe book.
+
 ## Dust triggers
 
 What happens when salis mundus is used on a block. Three flavors.

@@ -1,14 +1,3 @@
 - [Home](/)
-- [Getting started](getting-started.md)
-- Content
-  - [Warded jars](jars.md)
-  - [Wand caps and rods](wand-parts.md)
-  - [Golems](golems.md)
-- Data
-  - [Recipes](recipes.md)
-  - [Aspects, research and more](registries.md)
-  - [Item and entity aspects](data-maps.md)
-- Scripting
-  - [Bindings](bindings.md)
-  - [Events](events.md)
-- [Troubleshooting](troubleshooting.md)
+- [Minecraft 26.1.2](26.1.2/)
+- [Minecraft 1.21.1](1.21.1/)

@@ -1,7 +1,12 @@
 package com.leclowndu93150.kubejs_thaumaturge;
 
+import com.google.gson.JsonObject;
 import com.leclowndu93150.kubejs_thaumaturge.binding.AspectPoolsWrapper;
 import com.leclowndu93150.kubejs_thaumaturge.binding.DataMapsWrapper;
+import com.leclowndu93150.kubejs_thaumaturge.binding.EssentiaWrapper;
+import com.leclowndu93150.kubejs_thaumaturge.binding.SpellsWrapper;
+import com.leclowndu93150.kubejs_thaumaturge.binding.VisRelayWrapper;
+import com.leclowndu93150.kubejs_thaumaturge.builder.GolemAccessoryItemBuilder;
 import com.leclowndu93150.kubejs_thaumaturge.builder.GolemAddonBuilder;
 import com.leclowndu93150.kubejs_thaumaturge.builder.GolemArmBuilder;
 import com.leclowndu93150.kubejs_thaumaturge.builder.GolemHeadBuilder;
@@ -9,6 +14,7 @@ import com.leclowndu93150.kubejs_thaumaturge.builder.GolemLegBuilder;
 import com.leclowndu93150.kubejs_thaumaturge.builder.GolemMaterialBuilder;
 import com.leclowndu93150.kubejs_thaumaturge.builder.GolemTraitBuilder;
 import com.leclowndu93150.kubejs_thaumaturge.builder.JarBlockBuilder;
+import com.leclowndu93150.kubejs_thaumaturge.builder.StabiliserBlockBuilder;
 import com.leclowndu93150.kubejs_thaumaturge.builder.WandCapBuilder;
 import com.leclowndu93150.kubejs_thaumaturge.builder.WandCapItemBuilder;
 import com.leclowndu93150.kubejs_thaumaturge.builder.WandRodBuilder;
@@ -23,21 +29,31 @@ import com.leclowndu93150.thaumaturge.api.aspect.AspectList;
 import com.leclowndu93150.thaumaturge.api.aspect.IAspect;
 import com.leclowndu93150.thaumaturge.api.aura.AuraHelper;
 import com.leclowndu93150.thaumaturge.api.capability.KnowledgeAccess;
+import com.leclowndu93150.thaumaturge.api.golems.GolemHelper;
+import com.leclowndu93150.thaumaturge.api.items.GogglesAccess;
+import com.leclowndu93150.thaumaturge.api.items.RechargeAccess;
 import com.leclowndu93150.thaumaturge.api.recipe.Blueprint;
 import com.leclowndu93150.thaumaturge.api.research.IResearchCategory;
 import com.leclowndu93150.thaumaturge.api.research.IResearchEntry;
 import com.leclowndu93150.thaumaturge.api.research.scan.ScanEntry;
+import com.leclowndu93150.thaumaturge.api.research.scan.ScanningManager;
+import com.leclowndu93150.thaumaturge.api.spell.affinity.AspectAffinity;
+import com.leclowndu93150.thaumaturge.api.spell.part.SpellPart;
 import com.leclowndu93150.thaumaturge.api.taint.TaintApi;
 import com.leclowndu93150.thaumaturge.api.wands.WandAccess;
 import com.leclowndu93150.thaumaturge.api.warp.WarpHelper;
 import com.leclowndu93150.thaumaturge.content.aspect.Aspect;
+import com.leclowndu93150.thaumaturge.content.pech.PechTradeTable;
 import com.leclowndu93150.thaumaturge.content.research.ResearchCategory;
 import com.leclowndu93150.thaumaturge.content.research.ResearchEntry;
 import dev.latvian.mods.kubejs.event.EventGroupRegistry;
+import dev.latvian.mods.kubejs.generator.KubeDataGenerator;
 import dev.latvian.mods.kubejs.plugin.KubeJSPlugin;
 import dev.latvian.mods.kubejs.recipe.component.RecipeComponentTypeRegistry;
 import dev.latvian.mods.kubejs.recipe.schema.RecipeSchemaRegistry;
+import dev.latvian.mods.kubejs.registry.BuilderBase;
 import dev.latvian.mods.kubejs.registry.BuilderTypeRegistry;
+import dev.latvian.mods.kubejs.registry.RegistryObjectStorage;
 import dev.latvian.mods.kubejs.registry.ServerRegistryRegistry;
 import dev.latvian.mods.kubejs.script.BindingRegistry;
 import dev.latvian.mods.kubejs.script.TypeWrapperRegistry;
@@ -58,12 +74,13 @@ public class ThaumaturgeKubeJSPlugin implements KubeJSPlugin {
         registry.addDefault(GolemArmBuilder.REGISTRY, GolemArmBuilder.class, GolemArmBuilder::new);
         registry.addDefault(GolemLegBuilder.REGISTRY, GolemLegBuilder.class, GolemLegBuilder::new);
         registry.addDefault(GolemAddonBuilder.REGISTRY, GolemAddonBuilder.class, GolemAddonBuilder::new);
-        registry.of(
-                Registries.BLOCK,
-                reg -> reg.add(
-                        Identifier.fromNamespaceAndPath("thaumaturge", "jar"),
-                        JarBlockBuilder.class,
-                        JarBlockBuilder::new));
+        registry.of(Registries.BLOCK, reg -> {
+            reg.add(Identifier.fromNamespaceAndPath("thaumaturge", "jar"), JarBlockBuilder.class, JarBlockBuilder::new);
+            reg.add(
+                    Identifier.fromNamespaceAndPath("thaumaturge", "infusion_stabiliser"),
+                    StabiliserBlockBuilder.class,
+                    StabiliserBlockBuilder::new);
+        });
         registry.of(Registries.ITEM, reg -> {
             reg.add(
                     Identifier.fromNamespaceAndPath("thaumaturge", "wand_cap"),
@@ -73,6 +90,10 @@ public class ThaumaturgeKubeJSPlugin implements KubeJSPlugin {
                     Identifier.fromNamespaceAndPath("thaumaturge", "wand_rod"),
                     WandRodItemBuilder.class,
                     WandRodItemBuilder::new);
+            reg.add(
+                    Identifier.fromNamespaceAndPath("thaumaturge", "golem_accessory"),
+                    GolemAccessoryItemBuilder.class,
+                    GolemAccessoryItemBuilder::new);
         });
     }
 
@@ -83,6 +104,9 @@ public class ThaumaturgeKubeJSPlugin implements KubeJSPlugin {
         registry.register(IResearchEntry.REGISTRY_KEY, ResearchEntry.CODEC, IResearchEntry.class);
         registry.register(ScanEntry.REGISTRY_KEY, ScanEntry.CODEC, ScanEntry.class);
         registry.register(Blueprint.REGISTRY_KEY, Blueprint.CODEC, Blueprint.class);
+        registry.register(PechTradeTable.REGISTRY_KEY, PechTradeTable.CODEC, PechTradeTable.class);
+        registry.register(SpellPart.REGISTRY_KEY, SpellPart.CODEC, SpellPart.class);
+        registry.register(AspectAffinity.REGISTRY_KEY, AspectAffinity.CODEC, AspectAffinity.class);
     }
 
     @Override
@@ -138,5 +162,30 @@ public class ThaumaturgeKubeJSPlugin implements KubeJSPlugin {
         bindings.add("ThaumaturgeData", DataMapsWrapper.class);
         bindings.add("Knowledge", KnowledgeAccess.class);
         bindings.add("WandVis", WandAccess.class);
+        bindings.add("Essentia", EssentiaWrapper.class);
+        bindings.add("VisRelay", VisRelayWrapper.class);
+        bindings.add("Recharge", RechargeAccess.class);
+        bindings.add("Goggles", GogglesAccess.class);
+        bindings.add("Scanning", ScanningManager.class);
+        bindings.add("Golems", GolemHelper.class);
+        bindings.add("Spells", SpellsWrapper.class);
+    }
+
+    @Override
+    public void generateData(KubeDataGenerator generator) {
+        JsonObject values = new JsonObject();
+        for (BuilderBase<?> builder : RegistryObjectStorage.ALL_BUILDERS) {
+            if (builder instanceof GolemAccessoryItemBuilder accessory) {
+                JsonObject entry = new JsonObject();
+                entry.addProperty("accessory", accessory.accessoryId.toString());
+                values.add(accessory.id.toString(), entry);
+            }
+        }
+        if (values.isEmpty()) {
+            return;
+        }
+        JsonObject file = new JsonObject();
+        file.add("values", values);
+        generator.json(Identifier.fromNamespaceAndPath("thaumaturge", "data_maps/item/golem_accessory"), file);
     }
 }

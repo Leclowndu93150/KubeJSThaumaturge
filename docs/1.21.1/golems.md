@@ -80,5 +80,5 @@ Opposite traits cancel each other when a golem would have both, like heavy and l
 Grab a placer straight from the creative tab, or:
 
 ```
-/give @s thaumaturge:golem_placer[thaumaturge:golem_properties={material:"mypack:diamond",head:"thaumaturge:basic",arms:"thaumaturge:basic",legs:"thaumaturge:walker",addon:"thaumaturge:none"}]
+/give @s thaumaturge:golem[thaumaturge:golem_properties={material:"mypack:diamond",head:"thaumaturge:basic",arms:"thaumaturge:basic",legs:"thaumaturge:walker",addon:"thaumaturge:none"}]
 ```

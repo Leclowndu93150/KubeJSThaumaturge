@@ -60,8 +60,27 @@ Textures follow the same pattern with `wand_rod_` names.
 | `.staff(bool)` | false | Staff core: bigger, casts, cannot craft |
 | `.runes(bool)` | false | Free potency level for socketed foci |
 | `.assemblyGate(research)` | unlock_auromancy | Research entry required for assembly recipes with this rod |
+| `.onAssemble((wand, input) => {})` | none | Runs when a wand is assembled from this rod, see below |
 | `.rodTexture(id)` | convention path | Texture on the wand model |
 | `.wandName(text)` | "Netherite" | The rod half of the wand's display name |
+
+## Carrying data onto the wand
+
+`onAssemble` runs every time the arcane workbench builds a wand, sceptre or staff from your rod. `wand` is the finished stack and you change it in place. `input` is the crafting grid: `input.items()`, `input.getItem(x, y)` and `input.player()`.
+
+```js
+event.create('mypack:wand_rod_bloodwood', 'thaumaturge:wand_rod')
+    .capacity(150)
+    .onAssemble((wand, input) => {
+        input.items().forEach(stack => {
+            if (stack.id == 'mypack:wand_rod_bloodwood' && stack.customName) {
+                wand.customName = stack.customName
+            }
+        })
+    })
+```
+
+The callback also runs for the preview in the result slot, so it can see the same grid more than once. Only touch `wand`, never the grid items.
 
 ## Naming
 
@@ -82,3 +101,5 @@ StartupEvents.registry('thaumaturge:wand_cap', event => {
     event.create('mypack:cursed').costModifier(0.5)
 })
 ```
+
+Rods work the same through `thaumaturge:wand_rod`, and take the same methods as the rod item, `assemblyGate` and `onAssemble` included.

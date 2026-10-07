@@ -1,6 +1,7 @@
 package com.leclowndu93150.kubejs_thaumaturge.builder;
 
 import com.leclowndu93150.thaumaturge.api.aspect.IAspect;
+import com.leclowndu93150.thaumaturge.api.wands.IWandRodOnAssemble;
 import com.leclowndu93150.thaumaturge.api.wands.IWandRodOnUpdate;
 import com.leclowndu93150.thaumaturge.api.wands.WandRod;
 import com.leclowndu93150.thaumaturge.content.wands.WandRodPrimalOnUpdate;
@@ -21,6 +22,8 @@ public class WandRodBuilder extends BuilderBase<WandRod> {
     private boolean glow;
     private boolean staff;
     private boolean runes;
+    private @Nullable Identifier assemblyGate;
+    private @Nullable IWandRodOnAssemble onAssemble;
 
     public WandRodBuilder(Identifier id) {
         super(id);
@@ -65,6 +68,16 @@ public class WandRodBuilder extends BuilderBase<WandRod> {
         return this;
     }
 
+    public WandRodBuilder assemblyGate(Identifier research) {
+        this.assemblyGate = research;
+        return this;
+    }
+
+    public WandRodBuilder onAssemble(IWandRodOnAssemble callback) {
+        this.onAssemble = callback;
+        return this;
+    }
+
     public WandRodBuilder runes(boolean runes) {
         this.runes = runes;
         return this;
@@ -78,6 +91,6 @@ public class WandRodBuilder extends BuilderBase<WandRod> {
         } else if (chargeAllPrimals) {
             onUpdate = new WandRodPrimalOnUpdate();
         }
-        return new WandRod(capacity, craftCost, texture, onUpdate, glow, staff, runes);
+        return new WandRod(capacity, craftCost, texture, onUpdate, glow, staff, runes, assemblyGate, null, onAssemble);
     }
 }

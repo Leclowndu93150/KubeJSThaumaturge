@@ -1,0 +1,18 @@
+- [Minecraft 26.1.2](/26.1.2/)
+- [Getting started](getting-started.md)
+- Content
+  - [Warded jars](jars.md)
+  - [Wand caps and rods](wand-parts.md)
+  - [Golems](golems.md)
+  - [Spells](spells.md)
+  - [Golem accessories](golem-accessories.md)
+  - [Infusion stabilisers](infusion.md)
+- Data
+  - [Recipes](recipes.md)
+  - [Aspects, research and more](registries.md)
+  - [Data maps](data-maps.md)
+- Scripting
+  - [Bindings](bindings.md)
+  - [Events](events.md)
+- [Troubleshooting](troubleshooting.md)
+- [Switch to 1.21.1](/1.21.1/)

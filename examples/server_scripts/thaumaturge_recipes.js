@@ -26,7 +26,7 @@ ServerEvents.recipes(event => {
         Item.of('minecraft:glowstone_dust', 4),
         ['minecraft:redstone', 'minecraft:quartz'],
         25,
-        [{ aspect: 'thaumaturge:lux', amount: 2 }]
+        [{ aspect: 'thaumaturge:aer', amount: 2 }]
     )
 })
 

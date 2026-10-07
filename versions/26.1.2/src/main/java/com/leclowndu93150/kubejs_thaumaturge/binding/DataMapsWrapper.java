@@ -21,6 +21,18 @@ public final class DataMapsWrapper {
         write(event, "entity_type", "entity_aspects", entries);
     }
 
+    public static void itemWarp(KubeDataGenerator event, Map<String, Integer> entries) {
+        JsonObject values = new JsonObject();
+        entries.forEach((item, amount) -> {
+            JsonObject warp = new JsonObject();
+            warp.addProperty("amount", amount);
+            values.add(item, warp);
+        });
+        JsonObject file = new JsonObject();
+        file.add("values", values);
+        event.json(Identifier.fromNamespaceAndPath("thaumaturge", "data_maps/item/warp"), file);
+    }
+
     private static void write(KubeDataGenerator event, String kind, String name, Map<String, JsonElement> entries) {
         JsonObject values = new JsonObject();
         entries.forEach(values::add);

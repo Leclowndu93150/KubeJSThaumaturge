@@ -55,3 +55,29 @@ StartupEvents.registry('minecraft:block', event => {
         .sideTexture('example:block/mega_jar_side')
         .displayName('Mega Warded Jar')
 })
+
+// Golem accessories: the item, the accessory behind it and the item -> accessory
+// data map entry are all created here. The item model is drawn on the golem.
+StartupEvents.registry('minecraft:item', event => {
+    event.create('example:monocle', 'thaumaturge:golem_accessory')
+        .group('thaumaturge:eyes')
+        .rangeFactor(1.25)
+
+    event.create('example:medal', 'thaumaturge:golem_accessory')
+        .killCredit(true)
+        .armor(2)
+        .renderOn('body')
+        .renderOffset(0, 0.2, -0.13)
+        .renderScale(0.15)
+})
+
+// Infusion stabilisers with their own strength. researchAid makes the block help
+// at a research table when it sits on top of it.
+StartupEvents.registry('minecraft:block', event => {
+    event.create('example:warding_totem', 'thaumaturge:infusion_stabiliser')
+        .stabilization(0.25)
+
+    event.create('example:scholars_candle', 'thaumaturge:infusion_stabiliser')
+        .stabilization(0.1)
+        .researchAid(0.15)
+})

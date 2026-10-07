@@ -34,6 +34,10 @@ The easiest way to make them is to copy `jar_top.png` and `jar_side.png` from th
 
 All the normal KubeJS block builder methods work too (`displayName`, `tags`, and so on).
 
+## As an item
+
+A jar you pick up keeps its essentia, just like the mod's jars. Your jars also get Thaumaturge's essentia item capabilities, so phials, essentia transfer and anything else that fills or drains a held jar treats them like the real thing, capacity included. Scripts can do the same with `Essentia.fillItem` and `Essentia.drainItem` from the [Bindings](bindings.md) page.
+
 ## Capacity and the fill line
 
 The renderer draws the fill height as a fraction of your capacity. A jar with `capacity(4000)` holding 250 essentia looks nearly empty while the standard jar next to it looks full. That is intended, and useful feedback for players.

@@ -1,6 +1,7 @@
 package com.leclowndu93150.kubejs_thaumaturge.builder;
 
 import com.leclowndu93150.thaumaturge.api.aspect.IAspect;
+import com.leclowndu93150.thaumaturge.api.wands.IWandRodOnAssemble;
 import com.leclowndu93150.thaumaturge.api.wands.IWandRodOnUpdate;
 import com.leclowndu93150.thaumaturge.api.wands.WandRod;
 import com.leclowndu93150.thaumaturge.content.wands.ItemWandRod;
@@ -26,6 +27,7 @@ public class WandRodItemBuilder extends ItemBuilder {
     private boolean staff;
     private boolean runes;
     private @Nullable Identifier assemblyGate;
+    private @Nullable IWandRodOnAssemble onAssemble;
 
     public WandRodItemBuilder(Identifier id) {
         super(id);
@@ -78,6 +80,11 @@ public class WandRodItemBuilder extends ItemBuilder {
         return this;
     }
 
+    public WandRodItemBuilder onAssemble(IWandRodOnAssemble callback) {
+        this.onAssemble = callback;
+        return this;
+    }
+
     public WandRodItemBuilder runes(boolean runes) {
         this.runes = runes;
         return this;
@@ -116,7 +123,8 @@ public class WandRodItemBuilder extends ItemBuilder {
             } else if (chargeAllPrimals) {
                 onUpdate = new WandRodPrimalOnUpdate();
             }
-            return new WandRod(capacity, craftCost, rodTexture, onUpdate, glow, staff, runes, assemblyGate);
+            return new WandRod(
+                    capacity, craftCost, rodTexture, onUpdate, glow, staff, runes, assemblyGate, null, onAssemble);
         }));
     }
 }

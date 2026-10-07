@@ -1,7 +1,7 @@
 package com.leclowndu93150.kubejs_thaumaturge.builder;
 
+import com.leclowndu93150.kubejs_thaumaturge.block.CustomJarBlock;
 import com.leclowndu93150.thaumaturge.api.essentia.IEssentiaJar;
-import com.leclowndu93150.thaumaturge.content.essentia.jar.BlockJarCustom;
 import com.leclowndu93150.thaumaturge.registry.TCBlocks;
 import dev.latvian.mods.kubejs.block.BlockBuilder;
 import dev.latvian.mods.kubejs.item.ItemBuilder;
@@ -56,7 +56,7 @@ public class JarBlockBuilder extends BlockBuilder {
         if (copyPropertiesFrom == null) {
             copyPropertiesFrom = TCBlocks.JAR_NORMAL.get();
         }
-        return new BlockJarCustom(
+        return new CustomJarBlock(
                 createProperties(),
                 capacity,
                 Identifier.parse(textures.get("side")),
