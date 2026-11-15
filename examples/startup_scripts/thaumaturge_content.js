@@ -9,8 +9,10 @@
 StartupEvents.registry('minecraft:item', event => {
     event.create('example:wand_cap_netherite', 'thaumaturge:wand_cap')
         .costModifier(0.75)
-        .specialAspects(['thaumaturge:ignis', 'thaumaturge:perditio'], 0.6)
+        .aspectCost('thaumaturge:ignis', 0.6)
+        .aspectCost('thaumaturge:perditio', 0.6)
         .craftCost(12)
+        .recolor(0x4A4348)
         .wandName('Netherite Shod')
 
     event.create('example:wand_rod_netherite', 'thaumaturge:wand_rod')
@@ -19,6 +21,8 @@ StartupEvents.registry('minecraft:item', event => {
         .primalCharge('thaumaturge:ignis')
         .glow(true)
         .assemblyGate('thaumaturge:rod_silverwood')
+        .recolor(0x5C4E4A)
+        .runes(true)
         .wandName('Netherite')
 })
 
@@ -37,6 +41,13 @@ StartupEvents.registry('thaumaturge:golem_material', event => {
         .base('minecraft:netherite_ingot')
         .mechanism('thaumaturge:mechanism_complex')
         .traits(['thaumaturge:heavy', 'thaumaturge:fireproof', 'thaumaturge:blastproof'])
+        .texture('minecraft:textures/block/netherite_block.png')
+
+    event.create('example:amethyst')
+        .health(14).armor(5).damage(3)
+        .base('minecraft:amethyst_shard')
+        .mechanism('thaumaturge:mechanism_simple')
+        .recolor(0x9A5CC6)
 })
 
 StartupEvents.registry('thaumaturge:golem_head', event => {
@@ -46,13 +57,12 @@ StartupEvents.registry('thaumaturge:golem_head', event => {
         .materialBase()
 })
 
-// Custom jars: same glass model, your textures, your capacity. The fill renderer,
-// label support, tube/phial interactions and Jade tooltip all come along for free.
+// Custom jars: same glass model, your capacity, and a lid recoloured from the mod's own.
+// The fill renderer, label support, tube/phial interactions and Jade tooltip all come along for free.
 StartupEvents.registry('minecraft:block', event => {
     event.create('example:mega_jar', 'thaumaturge:jar')
         .capacity(1000)
-        .topTexture('example:block/mega_jar_top')
-        .sideTexture('example:block/mega_jar_side')
+        .recolor(0xC9A227)
         .displayName('Mega Warded Jar')
 })
 
@@ -62,13 +72,15 @@ StartupEvents.registry('minecraft:item', event => {
     event.create('example:monocle', 'thaumaturge:golem_accessory')
         .group('thaumaturge:eyes')
         .rangeFactor(1.25)
+        .texture('thaumaturge:item/golem_glasses')
 
     event.create('example:medal', 'thaumaturge:golem_accessory')
         .killCredit(true)
         .armor(2)
+        .texture('thaumaturge:item/amulet_mundane')
         .renderOn('body')
-        .renderOffset(0, 0.2, -0.13)
-        .renderScale(0.15)
+        .renderOffset(0, 0.3, -0.21)
+        .renderScale(0.25)
 })
 
 // Infusion stabilisers with their own strength. researchAid makes the block help
@@ -76,8 +88,41 @@ StartupEvents.registry('minecraft:item', event => {
 StartupEvents.registry('minecraft:block', event => {
     event.create('example:warding_totem', 'thaumaturge:infusion_stabiliser')
         .stabilization(0.25)
+        .texture('thaumaturge:block/ancient_glyph')
 
     event.create('example:scholars_candle', 'thaumaturge:infusion_stabiliser')
         .stabilization(0.1)
         .researchAid(0.15)
+        .texture('thaumaturge:block/arcane_stone_1_framed')
+})
+
+// Research unlock requirements. Startup scripts run on both sides, so the book
+// can grey the entry out and show the message.
+Research.require('thaumaturge:unlock_eldritch',
+    player => player.stages.has('seen_the_obelisk'),
+    Text.of('Find an eldritch obelisk first').darkPurple())
+
+// A champion type of your own. Champions pick one champion trait at random.
+StartupEvents.registry('thaumaturge:mob_trait', event => {
+    event.create('example:frostbitten')
+        .champion()
+        .traitName('Frostbitten')
+        .aspect('thaumaturge:gelum', 5)
+        .onAttack((mob, target, source, amount) => {
+            target.setTicksFrozen(200)
+            return amount + 2
+        })
+})
+
+// A rod that only charges aqua while its holder is in water.
+StartupEvents.registry('minecraft:item', event => {
+    event.create('example:wand_rod_tidal', 'thaumaturge:wand_rod')
+        .capacity(100)
+        .wandName('Tidal')
+        .onUpdate((wand, player) => {
+            if (player.tickCount % 40 != 0 || !player.isInWater()) return
+            if (WandVis.getVis(wand, 'thaumaturge:aqua') < 5000) {
+                WandVis.addVis(wand, 'thaumaturge:aqua', 100)
+            }
+        })
 })

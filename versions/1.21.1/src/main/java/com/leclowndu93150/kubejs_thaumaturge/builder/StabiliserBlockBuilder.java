@@ -1,14 +1,14 @@
 package com.leclowndu93150.kubejs_thaumaturge.builder;
 
 import com.leclowndu93150.kubejs_thaumaturge.block.StabiliserBlock;
-import com.leclowndu93150.thaumaturge.api.infusion.IInfusionStabiliser;
+import com.leclowndu93150.thaumaturge.api.infusion.AltarStabiliser;
 import dev.latvian.mods.kubejs.block.custom.BasicKubeBlock;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
 import org.jspecify.annotations.Nullable;
 
 public class StabiliserBlockBuilder extends BasicKubeBlock.Builder {
-    public transient float stabilization = IInfusionStabiliser.DEFAULT_STABILIZATION;
+    public transient float stabilization = AltarStabiliser.STANDARD_PAIR_VALUE;
     public transient float researchAid;
     public transient @Nullable ResourceLocation countsAs;
 

@@ -1,6 +1,6 @@
 # Aspects, research and more
 
-Thaumaturge keeps a lot of its content in datapack registries: aspects, research categories and entries, scans, blueprints and pech trades. Scripts can create all of them. These are server scripts, but note that datapack registries only load at world creation and server start, not on `/reload`.
+Thaumaturge keeps a lot of its content in datapack registries: aspects, research categories and entries, scans, blueprints, pech trades, spell parts and the eldritch labyrinth. Scripts can create all of them. These are server scripts, but note that datapack registries only load at world creation and server start, not on `/reload`.
 
 ## Aspects
 
@@ -122,3 +122,61 @@ ServerEvents.registry('thaumaturge:pech_trade', event => {
 ```
 
 Results take an optional `count` and an optional `components` block, so enchanted books and potions work as trade goods. The mod's full tables are in its jar under `data/thaumaturge/thaumaturge/pech_trade/` if you want the complete starting point.
+
+## Mob traits
+
+Your own champion types and tainted mob abilities. Register them in a startup script, then hand them out with the [MobTraits](bindings.md#mobtraits) binding or a `tainted_profile` [data map](data-maps.md).
+
+```js
+StartupEvents.registry('thaumaturge:mob_trait', event => {
+    event.create('mypack:frostbitten')
+        .champion()
+        .traitName('Frostbitten')
+        .aspect('thaumaturge:gelum', 5)
+        .attribute('minecraft:max_health', 10, 'add_value')
+        .attribute('minecraft:attack_damage', 0.25, 'add_multiplied_base')
+        .onAttack((mob, target, source, amount) => {
+            target.setTicksFrozen(200)
+            return amount + 2
+        })
+        .onHurt((mob, attacker, source, amount) => attacker == null ? amount : amount * 0.5)
+        .onTick(mob => {
+            if (mob.isOnFire()) mob.extinguishFire()
+        })
+})
+```
+
+| Method | What it does |
+|---|---|
+| `.champion()` | Makes it a champion type. Champions roll one champion trait at random, so yours joins that pool |
+| `.taint()` | Mobs carrying it count as tainted |
+| `.replacesAi()` | The mob drops its own goals while it has the trait |
+| `.traitName(text)` | Display name, the capitalised id by default |
+| `.aspect(aspect, amount)` | Aspects the trait adds to a scan of the mob. Call once per aspect |
+| `.attribute(attribute, amount, operation)` | Attribute modifier while the trait is on the mob. Operations are `add_value`, `add_multiplied_base` and `add_multiplied_total` |
+| `.baseAttribute(attribute, value)` | Sets the attribute's base value instead |
+| `.onAdded(mob => {})`, `.onRemoved(mob => {})` | Run when the trait is put on or taken off a mob |
+| `.onTick(mob => {})` | Runs every tick on the server |
+| `.onAttack((mob, target, source, amount) => damage)` | Runs when the mob deals damage. Return the new damage, or nothing to leave it alone |
+| `.onHurt((mob, attacker, source, amount) => damage)` | The same for damage the mob takes. `attacker` can be null |
+
+The callbacks run for every mob with the trait, so keep `onTick` cheap.
+
+## Spell parts and affinities
+
+`thaumaturge:spell_part` and `thaumaturge:spell_affinity` have their own page: [Spells](spells.md).
+
+## Infusion instability
+
+`thaumaturge:instability_outcome` holds what can go wrong during an infusion. See [Infusion stabilisers](infusion.md#instability-outcomes).
+
+## The eldritch labyrinth
+
+The labyrinth behind the eldritch obelisks is built from four registries, all scriptable the same way as the ones above:
+
+| Registry | Holds |
+|---|---|
+| `thaumaturge:labyrinth` | A maze: its size, layout settings, room pools, encounters and block palette |
+| `thaumaturge:labyrinth_room` | A room: its structure templates, footprint, door sockets and how often it may appear |
+| `thaumaturge:labyrinth_encounter` | Something that happens in a room, picked by `type` |
+| `thaumaturge:obelisk_site` | An obelisk structure: its template, behaviour, awakening and the aura node it holds |

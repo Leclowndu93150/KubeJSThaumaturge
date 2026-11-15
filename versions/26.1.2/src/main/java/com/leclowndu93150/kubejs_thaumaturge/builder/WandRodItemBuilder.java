@@ -1,13 +1,17 @@
 package com.leclowndu93150.kubejs_thaumaturge.builder;
 
+import com.leclowndu93150.kubejs_thaumaturge.client.TextureColorizer;
 import com.leclowndu93150.thaumaturge.api.aspect.IAspect;
 import com.leclowndu93150.thaumaturge.api.wands.IWandRodOnAssemble;
 import com.leclowndu93150.thaumaturge.api.wands.IWandRodOnUpdate;
+import com.leclowndu93150.thaumaturge.api.wands.IWandVisStorage;
 import com.leclowndu93150.thaumaturge.api.wands.WandRod;
 import com.leclowndu93150.thaumaturge.content.wands.ItemWandRod;
 import com.leclowndu93150.thaumaturge.content.wands.WandRodPrimalOnUpdate;
-import com.leclowndu93150.thaumaturge.registry.TCWandParts;
+import com.leclowndu93150.thaumaturge.registry.TTWandParts;
 import dev.latvian.mods.kubejs.client.LangKubeEvent;
+import dev.latvian.mods.kubejs.color.KubeColor;
+import dev.latvian.mods.kubejs.generator.KubeAssetGenerator;
 import dev.latvian.mods.kubejs.item.ItemBuilder;
 import dev.latvian.mods.kubejs.registry.AdditionalObjectRegistry;
 import net.minecraft.resources.Identifier;
@@ -16,10 +20,17 @@ import net.minecraft.world.item.Item;
 import org.jspecify.annotations.Nullable;
 
 public class WandRodItemBuilder extends ItemBuilder {
+    private static final Identifier ITEM_COLOR_BASE =
+            Identifier.fromNamespaceAndPath("thaumaturge", "item/wand_rod_silverwood");
+    private static final Identifier STAFF_COLOR_BASE =
+            Identifier.fromNamespaceAndPath("thaumaturge", "item/staff_rod_silverwood");
+
     public final Identifier partId;
     private int capacity = 25;
     private int craftCost = 1;
     private Identifier rodTexture;
+    private boolean customRodTexture;
+    private @Nullable Integer color;
     private String wandName;
     private @Nullable ResourceKey<IAspect> chargeAspect;
     private boolean chargeAllPrimals;
@@ -28,6 +39,8 @@ public class WandRodItemBuilder extends ItemBuilder {
     private boolean runes;
     private @Nullable Identifier assemblyGate;
     private @Nullable IWandRodOnAssemble onAssemble;
+    private @Nullable IWandRodOnUpdate onUpdate;
+    private @Nullable IWandVisStorage visStorage;
 
     public WandRodItemBuilder(Identifier id) {
         super(id);
@@ -50,7 +63,29 @@ public class WandRodItemBuilder extends ItemBuilder {
 
     public WandRodItemBuilder rodTexture(Identifier texture) {
         this.rodTexture = texture;
+        this.customRodTexture = true;
         return this;
+    }
+
+    public WandRodItemBuilder recolor(KubeColor color) {
+        this.color = color.kjs$getRGB();
+        return this;
+    }
+
+    @Override
+    public void generateAssets(KubeAssetGenerator generator) {
+        super.generateAssets(generator);
+        if (color != null) {
+            TextureColorizer.generate(
+                    generator,
+                    id.withPath("item/" + id.getPath()),
+                    staff ? STAFF_COLOR_BASE : ITEM_COLOR_BASE,
+                    color,
+                    false);
+            if (!customRodTexture) {
+                TextureColorizer.generate(generator, rodTexture, WandRodBuilder.COLOR_BASE, color, false);
+            }
+        }
     }
 
     public WandRodItemBuilder primalCharge(Identifier aspect) {
@@ -85,6 +120,16 @@ public class WandRodItemBuilder extends ItemBuilder {
         return this;
     }
 
+    public WandRodItemBuilder onUpdate(IWandRodOnUpdate callback) {
+        this.onUpdate = callback;
+        return this;
+    }
+
+    public WandRodItemBuilder visStorage(ScriptedWandVisStorage.Reader reader, ScriptedWandVisStorage.Writer writer) {
+        this.visStorage = new ScriptedWandVisStorage(reader, writer);
+        return this;
+    }
+
     public WandRodItemBuilder runes(boolean runes) {
         this.runes = runes;
         return this;
@@ -111,20 +156,29 @@ public class WandRodItemBuilder extends ItemBuilder {
     @Override
     public Item createObject() {
         Identifier part = partId;
-        return new ItemWandRod(createItemProperties(), () -> TCWandParts.rods().getValue(part));
+        return new ItemWandRod(createItemProperties(), () -> TTWandParts.rods().getValue(part));
     }
 
     @Override
     public void createAdditionalObjects(AdditionalObjectRegistry registry) {
         registry.add(WandRod.REGISTRY_KEY, new WandPartEntryBuilder<>(partId, () -> {
-            IWandRodOnUpdate onUpdate = null;
+            IWandRodOnUpdate charge = null;
             if (chargeAspect != null) {
-                onUpdate = new WandRodPrimalOnUpdate(chargeAspect);
+                charge = new WandRodPrimalOnUpdate(chargeAspect);
             } else if (chargeAllPrimals) {
-                onUpdate = new WandRodPrimalOnUpdate();
+                charge = new WandRodPrimalOnUpdate();
             }
             return new WandRod(
-                    capacity, craftCost, rodTexture, onUpdate, glow, staff, runes, assemblyGate, null, onAssemble);
+                    capacity,
+                    craftCost,
+                    rodTexture,
+                    WandRodBuilder.combine(charge, onUpdate),
+                    glow,
+                    staff,
+                    runes,
+                    assemblyGate,
+                    visStorage,
+                    onAssemble);
         }));
     }
 }

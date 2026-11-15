@@ -10,7 +10,7 @@ The addon is not loaded, or an old version of it. Check the log for `Found plugi
 
 ## The addon does not load, or a class is missing on startup
 
-This build is for Minecraft 26.1.2 and needs Thaumaturge 0.2.1 or newer. Older Thaumaturge versions are missing API the addon uses. On Minecraft 1.21.1 you need the 1.21.1 build of the addon, which has [its own docs](/1.21.1/).
+This build is for Minecraft 26.1.2 and needs Thaumaturge 1.1.0 or newer. Older Thaumaturge versions are missing API the addon uses. On Minecraft 1.21.1 you need the 1.21.1 build of the addon, which has [its own docs](/1.21.1/).
 
 ## My recipes silently do nothing
 

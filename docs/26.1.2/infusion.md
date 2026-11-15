@@ -50,6 +50,26 @@ Stabilisers only help when the block on the opposite side of the altar is the sa
 
 Now a red totem across from a blue one is a valid pair, and all three colors share the same diminishing returns.
 
+## Instability outcomes
+
+When an infusion's instability triggers, one outcome is picked by weight from the `thaumaturge:instability_outcome` registry. Scripts can add outcomes or redefine the mod's own (`thaumaturge:zap`, `thaumaturge:warp`, `thaumaturge:explosion` and so on):
+
+```js
+ServerEvents.registry('thaumaturge:instability_outcome', event => {
+    event.create('mypack:lingering_poison').json({
+        weight: 3,
+        effect: {
+            type: 'thaumaturge:harm',
+            effects: [{ id: 'minecraft:poison', duration: 200, amplifier: 1 }]
+        }
+    })
+})
+```
+
+Effect types: `thaumaturge:eject` (`consume`, `aftermath`, `mitigation`, `pollution`, `explosion_power`), `thaumaturge:zap` (`damage`, `everyone`), `thaumaturge:harm` (`effects`, `everyone`), `thaumaturge:warp` (`permanent_chance`, `permanent`, `temporary`) and `thaumaturge:explode` (`power`). Redefine an id with `weight: 0` to switch a built-in outcome off. Like the other datapack registries, this loads at server start, not on `/reload`.
+
+Pedestals, pillars and matrix upgrades that change cost, speed and stability are data maps, see [Data maps](data-maps.md).
+
 ## Research table aid
 
 A block with `researchAid` helps research when it sits directly on top of a research table. Whenever a player writes an aspect onto a note or combines two aspects, there is that chance the aspect is not taken from their pool. The blocks above both halves of the table add up.

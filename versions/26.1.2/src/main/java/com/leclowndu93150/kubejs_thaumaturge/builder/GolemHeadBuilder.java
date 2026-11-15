@@ -20,6 +20,6 @@ public class GolemHeadBuilder extends GolemPartBuilder<GolemHead> {
 
     @Override
     public GolemHead createObject() {
-        return new GolemHead(research, icon, partModel(), components, null, resolvedTraits());
+        return new GolemHead(research, icon, partModel(), components, onTick, resolvedTraits());
     }
 }

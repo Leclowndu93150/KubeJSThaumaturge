@@ -4,6 +4,7 @@
   - [Warded jars](jars.md)
   - [Wand caps and rods](wand-parts.md)
   - [Golems](golems.md)
+  - [Spells](spells.md)
   - [Golem accessories](golem-accessories.md)
   - [Infusion stabilisers](infusion.md)
 - Data

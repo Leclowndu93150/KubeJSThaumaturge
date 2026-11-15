@@ -20,6 +20,6 @@ public class GolemLegBuilder extends GolemPartBuilder<GolemLeg> {
 
     @Override
     public GolemLeg createObject() {
-        return new GolemLeg(research, icon, partModel(), components, null, resolvedTraits());
+        return new GolemLeg(research, icon, partModel(), components, onTick, resolvedTraits());
     }
 }

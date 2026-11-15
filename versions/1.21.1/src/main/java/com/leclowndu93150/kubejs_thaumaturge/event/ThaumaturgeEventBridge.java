@@ -1,9 +1,9 @@
 package com.leclowndu93150.kubejs_thaumaturge.event;
 
+import com.leclowndu93150.thaumaturge.api.crucible.CrucibleEvent;
 import com.leclowndu93150.thaumaturge.api.infusion.InfusionCraftedEvent;
 import com.leclowndu93150.thaumaturge.api.recipe.ArcaneCraftCostEvent;
 import com.leclowndu93150.thaumaturge.api.research.ResearchEvent;
-import com.leclowndu93150.thaumaturge.content.crucible.CrucibleEvent;
 import dev.latvian.mods.kubejs.script.ScriptType;
 import net.neoforged.bus.api.IEventBus;
 
@@ -52,11 +52,11 @@ public final class ThaumaturgeEventBridge {
         ThaumaturgeEvents.INFUSION_CRAFTED.post(ScriptType.SERVER, new InfusionCraftedKubeEvent(event));
     }
 
-    private static void onCrucibleCrafted(CrucibleEvent.CrucibleCraftedEvent event) {
+    private static void onCrucibleCrafted(CrucibleEvent.Crafted event) {
         ThaumaturgeEvents.CRUCIBLE_CRAFTED.post(ScriptType.SERVER, new CrucibleCraftedKubeEvent(event));
     }
 
-    private static void onCrucibleDecompose(CrucibleEvent.CrucibleDecomposeItemEvent event) {
+    private static void onCrucibleDecompose(CrucibleEvent.Dissolve event) {
         ThaumaturgeEvents.CRUCIBLE_DECOMPOSE
                 .post(ScriptType.SERVER, new CrucibleDecomposeKubeEvent(event))
                 .applyCancel(event);

@@ -4,6 +4,7 @@ import com.leclowndu93150.thaumaturge.api.golems.GolemTrait;
 import com.leclowndu93150.thaumaturge.api.golems.parts.GolemComponent;
 import com.leclowndu93150.thaumaturge.api.golems.parts.GolemPart;
 import com.leclowndu93150.thaumaturge.api.golems.parts.GolemPartModel;
+import com.leclowndu93150.thaumaturge.api.golems.parts.IGolemPartAbility;
 import dev.latvian.mods.kubejs.client.LangKubeEvent;
 import dev.latvian.mods.kubejs.registry.BuilderBase;
 import java.util.ArrayList;
@@ -22,6 +23,7 @@ public abstract class GolemPartBuilder<T> extends BuilderBase<T> {
     protected @Nullable ResourceLocation objModel;
     protected @Nullable ResourceLocation modelTexture;
     protected GolemPartModel.AttachPoint attachPoint;
+    protected @Nullable IGolemPartAbility onTick;
     protected String partName;
     protected String partText;
 
@@ -98,6 +100,11 @@ public abstract class GolemPartBuilder<T> extends BuilderBase<T> {
 
     public GolemPartBuilder<T> materialMechanism() {
         this.components.add(GolemComponent.mechanism());
+        return this;
+    }
+
+    public GolemPartBuilder<T> onTick(IGolemPartAbility callback) {
+        this.onTick = callback;
         return this;
     }
 

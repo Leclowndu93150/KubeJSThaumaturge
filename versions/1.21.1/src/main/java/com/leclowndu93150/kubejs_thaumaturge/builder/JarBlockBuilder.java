@@ -1,13 +1,17 @@
 package com.leclowndu93150.kubejs_thaumaturge.builder;
 
 import com.leclowndu93150.kubejs_thaumaturge.block.CustomJarBlock;
+import com.leclowndu93150.kubejs_thaumaturge.client.TextureColorizer;
 import com.leclowndu93150.thaumaturge.api.essentia.IEssentiaJar;
-import com.leclowndu93150.thaumaturge.registry.TCBlocks;
+import com.leclowndu93150.thaumaturge.registry.TTBlocks;
 import dev.latvian.mods.kubejs.block.BlockBuilder;
 import dev.latvian.mods.kubejs.client.ModelGenerator;
+import dev.latvian.mods.kubejs.color.KubeColor;
+import dev.latvian.mods.kubejs.generator.KubeAssetGenerator;
 import dev.latvian.mods.kubejs.item.ItemBuilder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.block.Block;
+import org.jspecify.annotations.Nullable;
 
 public class JarBlockBuilder extends BlockBuilder {
     public static final ResourceLocation JAR_PARENT_MODEL =
@@ -16,6 +20,7 @@ public class JarBlockBuilder extends BlockBuilder {
             ResourceLocation.fromNamespaceAndPath("thaumaturge", "item/bewlr_block");
 
     public transient int capacity = IEssentiaJar.DEFAULT_CAPACITY;
+    private transient @Nullable Integer color;
 
     public JarBlockBuilder(ResourceLocation id) {
         super(id);
@@ -44,6 +49,33 @@ public class JarBlockBuilder extends BlockBuilder {
         return this;
     }
 
+    public JarBlockBuilder recolor(KubeColor color) {
+        this.color = color.kjs$getRGB();
+        sideTexture(colorSprite("side").toString());
+        topTexture(colorSprite("top").toString());
+        return this;
+    }
+
+    private ResourceLocation colorSprite(String face) {
+        return id.withPath("block/" + id.getPath() + "_" + face);
+    }
+
+    @Override
+    public void generateAssets(KubeAssetGenerator generator) {
+        if (color != null) {
+            generateColored(generator, "side", IEssentiaJar.DEFAULT_SIDE_TEXTURE);
+            generateColored(generator, "top", IEssentiaJar.DEFAULT_TOP_TEXTURE);
+        }
+        super.generateAssets(generator);
+    }
+
+    private void generateColored(KubeAssetGenerator generator, String face, ResourceLocation base) {
+        ResourceLocation sprite = colorSprite(face);
+        if (sprite.toString().equals(textures.get(face))) {
+            TextureColorizer.generate(generator, sprite, base, color, true);
+        }
+    }
+
     public JarBlockBuilder bottomTexture(String texture) {
         textures.put("bottom", texture);
         return this;
@@ -62,7 +94,7 @@ public class JarBlockBuilder extends BlockBuilder {
     @Override
     public Block createObject() {
         if (copyPropertiesFrom == null) {
-            copyPropertiesFrom = TCBlocks.JAR_NORMAL.get();
+            copyPropertiesFrom = TTBlocks.JAR_NORMAL.get();
         }
         return new CustomJarBlock(
                 createProperties(),

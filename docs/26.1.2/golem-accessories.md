@@ -48,20 +48,29 @@ The accessory's item model is drawn on the golem, on the head by default.
 | Method | Default | What it does |
 |---|---|---|
 | `.renderOn('head' or 'body')` | `'head'` | Which part it follows. Head accessories turn with the head |
-| `.renderOffset(x, y, z)` | 0, 0.3, 0 | Moves it from the anchor point, in blocks |
-| `.renderScale(float)` | 0.25 | Size of the item model |
+| `.renderOffset(x, y, z)` | 0, 0.5, 0 | Moves it from the anchor point, in model units |
+| `.renderScale(float)` | 0.42 | Size of the item model, in model units |
 | `.renderRotation(degrees)` | 0 | Turns it around the vertical axis |
 | `.noRender()` | | Invisible accessory, stats only |
 
-The defaults are a starting point. Every model sits differently, so place a golem, put the accessory on and tune the numbers until it looks right. Changes need a game restart like any startup script.
+Golems are drawn with Minecraft's copper golem model, shrunk to 0.6. Offsets and scale are measured on the model before that shrink, so 1 unit is one block of the copper golem model (0.6 of a real block) and 1/16 is one model pixel. `+Y` is up and `-Z` is the golem's front.
+
+| Anchor | Origin | Size around it |
+|---|---|---|
+| `head` | The head pivot | The head reaches 5/16 up, 4/16 to each side and 5/16 forward and back |
+| `body` | The bottom of the torso | The chest reaches 6/16 up, 4/16 to each side and 3/16 forward and back |
+
+The defaults sit the item just above the top of the head. Every model sits differently, so place a golem, put the accessory on and tune the numbers until it looks right. Changes need a game restart like any startup script.
 
 ```js
 event.create('mypack:crown', 'thaumaturge:golem_accessory')
     .group('thaumaturge:hat')
     .health(4)
-    .renderOffset(0, 0.28, 0)
-    .renderScale(0.2)
+    .renderOffset(0, 0.45, 0)
+    .renderScale(0.33)
 ```
+
+Anything in the `thaumaturge:hat` group also hides the antenna on materials that have one.
 
 A bowtie-style accessory goes on the body:
 
@@ -69,9 +78,11 @@ A bowtie-style accessory goes on the body:
 event.create('mypack:medal', 'thaumaturge:golem_accessory')
     .killCredit(true)
     .renderOn('body')
-    .renderOffset(0, 0.2, -0.13)
-    .renderScale(0.15)
+    .renderOffset(0, 0.3, -0.21)
+    .renderScale(0.25)
 ```
+
+The item model is always drawn opaque, so it stays solid on an invisible golem that a spectator or teammate still sees as a faint ghost.
 
 ## Existing items as accessories
 

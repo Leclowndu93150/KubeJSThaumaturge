@@ -1,11 +1,14 @@
 package com.leclowndu93150.kubejs_thaumaturge.block;
 
 import com.leclowndu93150.thaumaturge.api.essentia.IEssentiaJar;
-import com.leclowndu93150.thaumaturge.content.essentia.jar.BlockJar;
+import com.leclowndu93150.thaumaturge.content.essentia.jar.AbstractBlockEntityJar;
+import com.leclowndu93150.thaumaturge.content.essentia.jar.AbstractBlockJar;
+import com.leclowndu93150.thaumaturge.registry.TTBlockEntities;
 import com.mojang.serialization.MapCodec;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 
-public final class CustomJarBlock extends BlockJar {
+public final class CustomJarBlock extends AbstractBlockJar {
     public static final MapCodec<CustomJarBlock> CODEC = simpleCodec(props -> new CustomJarBlock(
             props,
             IEssentiaJar.DEFAULT_CAPACITY,
@@ -32,8 +35,13 @@ public final class CustomJarBlock extends BlockJar {
     }
 
     @Override
-    protected MapCodec<? extends BlockJar> codec() {
+    protected MapCodec<CustomJarBlock> codec() {
         return CODEC;
+    }
+
+    @Override
+    public BlockEntityType<AbstractBlockEntityJar> jarType() {
+        return TTBlockEntities.JAR.get();
     }
 
     @Override

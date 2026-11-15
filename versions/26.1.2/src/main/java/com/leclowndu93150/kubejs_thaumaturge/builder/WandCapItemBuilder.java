@@ -1,25 +1,33 @@
 package com.leclowndu93150.kubejs_thaumaturge.builder;
 
+import com.leclowndu93150.kubejs_thaumaturge.client.TextureColorizer;
 import com.leclowndu93150.thaumaturge.api.aspect.IAspect;
 import com.leclowndu93150.thaumaturge.api.wands.WandCap;
 import com.leclowndu93150.thaumaturge.content.wands.ItemWandCap;
-import com.leclowndu93150.thaumaturge.registry.TCWandParts;
+import com.leclowndu93150.thaumaturge.registry.TTWandParts;
 import dev.latvian.mods.kubejs.client.LangKubeEvent;
+import dev.latvian.mods.kubejs.color.KubeColor;
+import dev.latvian.mods.kubejs.generator.KubeAssetGenerator;
 import dev.latvian.mods.kubejs.item.ItemBuilder;
 import dev.latvian.mods.kubejs.registry.AdditionalObjectRegistry;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.Item;
+import org.jspecify.annotations.Nullable;
 
 public class WandCapItemBuilder extends ItemBuilder {
+    private static final Identifier ITEM_COLOR_BASE =
+            Identifier.fromNamespaceAndPath("thaumaturge", "item/wand_cap_iron");
+
     public final Identifier partId;
     private float costModifier = 1.0F;
-    private final List<ResourceKey<IAspect>> specialAspects = new ArrayList<>();
-    private float specialCostModifier;
+    private final Map<ResourceKey<IAspect>, Float> aspectCosts = new LinkedHashMap<>();
     private int craftCost = 1;
     private Identifier capTexture;
+    private boolean customCapTexture;
+    private @Nullable Integer color;
     private String wandName;
 
     public WandCapItemBuilder(Identifier id) {
@@ -36,12 +44,8 @@ public class WandCapItemBuilder extends ItemBuilder {
         return this;
     }
 
-    public WandCapItemBuilder specialAspects(List<Identifier> aspects, float modifier) {
-        this.specialAspects.clear();
-        for (Identifier aspect : aspects) {
-            this.specialAspects.add(ResourceKey.create(IAspect.REGISTRY_KEY, aspect));
-        }
-        this.specialCostModifier = modifier;
+    public WandCapItemBuilder aspectCost(Identifier aspect, float modifier) {
+        this.aspectCosts.put(ResourceKey.create(IAspect.REGISTRY_KEY, aspect), modifier);
         return this;
     }
 
@@ -52,7 +56,24 @@ public class WandCapItemBuilder extends ItemBuilder {
 
     public WandCapItemBuilder capTexture(Identifier texture) {
         this.capTexture = texture;
+        this.customCapTexture = true;
         return this;
+    }
+
+    public WandCapItemBuilder recolor(KubeColor color) {
+        this.color = color.kjs$getRGB();
+        return this;
+    }
+
+    @Override
+    public void generateAssets(KubeAssetGenerator generator) {
+        super.generateAssets(generator);
+        if (color != null) {
+            TextureColorizer.generate(generator, id.withPath("item/" + id.getPath()), ITEM_COLOR_BASE, color, false);
+            if (!customCapTexture) {
+                TextureColorizer.generate(generator, capTexture, WandCapBuilder.COLOR_BASE, color, false);
+            }
+        }
     }
 
     public WandCapItemBuilder wandName(String name) {
@@ -76,7 +97,7 @@ public class WandCapItemBuilder extends ItemBuilder {
     @Override
     public Item createObject() {
         Identifier part = partId;
-        return new ItemWandCap(createItemProperties(), () -> TCWandParts.caps().getValue(part));
+        return new ItemWandCap(createItemProperties(), () -> TTWandParts.caps().getValue(part));
     }
 
     @Override
@@ -84,7 +105,6 @@ public class WandCapItemBuilder extends ItemBuilder {
         registry.add(
                 WandCap.REGISTRY_KEY,
                 new WandPartEntryBuilder<>(
-                        partId,
-                        () -> new WandCap(costModifier, specialAspects, specialCostModifier, craftCost, capTexture)));
+                        partId, () -> new WandCap(costModifier, aspectCosts, craftCost, capTexture)));
     }
 }

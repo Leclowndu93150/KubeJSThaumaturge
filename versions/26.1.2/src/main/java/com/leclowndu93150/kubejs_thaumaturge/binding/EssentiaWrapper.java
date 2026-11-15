@@ -6,9 +6,9 @@ import com.leclowndu93150.thaumaturge.api.essentia.EssentiaAccess;
 import com.leclowndu93150.thaumaturge.api.essentia.EssentiaCapabilities;
 import com.leclowndu93150.thaumaturge.api.essentia.EssentiaCrystalAccess;
 import com.leclowndu93150.thaumaturge.api.essentia.EssentiaTransfer;
-import com.leclowndu93150.thaumaturge.api.essentia.IEssentiaContainerItem;
 import com.leclowndu93150.thaumaturge.api.essentia.IEssentiaItemStorage;
 import com.leclowndu93150.thaumaturge.api.essentia.IEssentiaStorage;
+import com.leclowndu93150.thaumaturge.api.essentia.IItemEssentia;
 import com.leclowndu93150.thaumaturge.api.essentia.ItemEssentiaTransferResult;
 import dev.latvian.mods.kubejs.util.RegistryAccessContainer;
 import net.minecraft.core.BlockPos;
@@ -88,8 +88,8 @@ public final class EssentiaWrapper {
         if (storage != null) {
             return storage.contents();
         }
-        IEssentiaContainerItem container = stack.getCapability(EssentiaCapabilities.CONTAINER);
-        return container == null ? AspectList.EMPTY : container.getAspects(stack);
+        IItemEssentia essentia = stack.getCapability(EssentiaCapabilities.CONTAINER);
+        return essentia == null ? AspectList.EMPTY : essentia.getAspects();
     }
 
     public static int itemCapacity(ItemStack stack, Identifier aspect) {

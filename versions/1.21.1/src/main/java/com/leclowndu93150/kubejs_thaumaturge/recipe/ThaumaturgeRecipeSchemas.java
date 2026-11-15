@@ -1,6 +1,6 @@
 package com.leclowndu93150.kubejs_thaumaturge.recipe;
 
-import com.leclowndu93150.thaumaturge.TCIds;
+import com.leclowndu93150.thaumaturge.TTIds;
 import com.leclowndu93150.thaumaturge.api.aspect.AspectList;
 import com.leclowndu93150.thaumaturge.api.recipe.ResearchGate;
 import dev.latvian.mods.kubejs.recipe.RecipeKey;
@@ -61,7 +61,7 @@ public interface ThaumaturgeRecipeSchemas {
             ThaumaturgeRecipeComponents.COMPONENT_PATCH.outputKey("catalyst_patch");
 
     RecipeSchema INFUSION_PATCH = new RecipeSchema(CATALYST_PATCH, CATALYST, COMPONENTS, ASPECTS, INSTABILITY, RESEARCH)
-            .typeOverride(TCIds.rl("infusion"));
+            .typeOverride(TTIds.rl("infusion"));
 
     RecipeKey<Block> TARGET = BlockComponent.BLOCK.inputKey("target");
     RecipeKey<TagKey<Block>> TARGET_TAG = TagKeyComponent.BLOCK.inputKey("target_tag");

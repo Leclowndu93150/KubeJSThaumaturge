@@ -1,8 +1,21 @@
 # Warded jars
 
-A jar in Thaumaturge is one shared glass model. What makes the normal jar and the void jar look different is just three texture slots: side, top and bottom. This addon exposes those slots plus the capacity, so a new jar kind is a startup script and two textures.
+A jar in Thaumaturge is one shared glass model. What makes the normal jar and the void jar look different is just three texture slots: side, top and bottom. This addon exposes those slots plus the capacity, so a new jar kind is a startup script and either a colour or two textures.
 
 ## Basic jar
+
+```js
+StartupEvents.registry('minecraft:block', event => {
+    event.create('mypack:mega_jar', 'thaumaturge:jar')
+        .capacity(1000)
+        .recolor(0xC9A227)
+        .displayName('Mega Warded Jar')
+})
+```
+
+`.recolor(...)` recolours the lid and band of the mod's jar and leaves the glass alone. The recolour keeps the lid's shading and swaps in your hue and saturation. It takes a number, a `'#RRGGBB'` string or a colour name.
+
+## Your own textures
 
 ```js
 StartupEvents.registry('minecraft:block', event => {
@@ -28,6 +41,7 @@ The easiest way to make them is to copy `jar_top.png` and `jar_side.png` from th
 | Method | Default | What it does |
 |---|---|---|
 | `.capacity(int)` | 250 | Essentia the jar holds. The fill render scales with it |
+| `.recolor(color)` | none | Recolours the lid and band, see above |
 | `.sideTexture(id)` | normal jar side | Also used as the particle texture |
 | `.topTexture(id)` | normal jar top | The lid |
 | `.bottomTexture(id)` | normal jar bottom | Usually fine to leave alone |
@@ -47,17 +61,16 @@ The renderer draws the fill height as a fraction of your capacity. A jar with `c
 ```js
 StartupEvents.registry('minecraft:block', event => {
     const TIERS = [
-        { name: 'copper',    cap: 500  },
-        { name: 'iron',      cap: 750  },
-        { name: 'gold',      cap: 1000 },
-        { name: 'diamond',   cap: 2000 },
-        { name: 'netherite', cap: 4000 },
+        { name: 'copper',    cap: 500,  color: 0xC15A36 },
+        { name: 'iron',      cap: 750,  color: 0xD8D8D8 },
+        { name: 'gold',      cap: 1000, color: 0xF2C53D },
+        { name: 'diamond',   cap: 2000, color: 0x4AEDD9 },
+        { name: 'netherite', cap: 4000, color: 0x4A4348 },
     ]
     TIERS.forEach(tier => {
         event.create(`mypack:jar_${tier.name}`, 'thaumaturge:jar')
             .capacity(tier.cap)
-            .topTexture(`mypack:block/jar_${tier.name}_top`)
-            .sideTexture(`mypack:block/jar_${tier.name}_side`)
+            .recolor(tier.color)
             .displayName(`${tier.name.charAt(0).toUpperCase() + tier.name.slice(1)} Warded Jar`)
     })
 })

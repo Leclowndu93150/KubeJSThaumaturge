@@ -1,8 +1,11 @@
 package com.leclowndu93150.kubejs_thaumaturge.builder;
 
+import com.leclowndu93150.kubejs_thaumaturge.client.TextureColorizer;
 import com.leclowndu93150.thaumaturge.api.golems.GolemTrait;
 import com.leclowndu93150.thaumaturge.api.golems.parts.GolemMaterial;
 import dev.latvian.mods.kubejs.client.LangKubeEvent;
+import dev.latvian.mods.kubejs.color.KubeColor;
+import dev.latvian.mods.kubejs.generator.KubeAssetGenerator;
 import dev.latvian.mods.kubejs.registry.BuilderBase;
 import java.util.ArrayList;
 import java.util.List;
@@ -12,26 +15,32 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.ItemStack;
+import org.jspecify.annotations.Nullable;
 
 public class GolemMaterialBuilder extends BuilderBase<GolemMaterial> {
     public static final ResourceKey<Registry<GolemMaterial>> REGISTRY = GolemMaterial.REGISTRY_KEY;
+    private static final Identifier COLOR_BASE =
+            Identifier.fromNamespaceAndPath("thaumaturge", "textures/block/metal_thaumium.png");
+    private static final int WHITE = 0xFFFFFF;
 
     private final List<Identifier> research = new ArrayList<>();
     private Identifier texture;
-    private int itemColor = 0xFFFFFF;
+    private boolean customTexture;
+    private @Nullable Integer color;
+    private @Nullable Integer itemColor;
     private int healthMod;
     private int armor;
     private int damage = 1;
     private Identifier base = Identifier.withDefaultNamespace("iron_ingot");
     private Identifier mechanism = Identifier.withDefaultNamespace("iron_ingot");
     private final List<Identifier> traits = new ArrayList<>();
+    private boolean antenna;
     private String partName;
     private String partText;
 
     public GolemMaterialBuilder(Identifier id) {
         super(id);
-        this.texture = Identifier.fromNamespaceAndPath(
-                id.getNamespace(), "textures/entity/golems/mat_" + id.getPath() + ".png");
+        this.texture = Identifier.fromNamespaceAndPath(id.getNamespace(), "textures/block/" + id.getPath() + ".png");
     }
 
     public GolemMaterialBuilder partName(String name) {
@@ -66,7 +75,25 @@ public class GolemMaterialBuilder extends BuilderBase<GolemMaterial> {
 
     public GolemMaterialBuilder texture(Identifier texture) {
         this.texture = texture;
+        this.customTexture = true;
         return this;
+    }
+
+    public GolemMaterialBuilder recolor(KubeColor color) {
+        this.color = color.kjs$getRGB();
+        if (!customTexture) {
+            this.texture = Identifier.fromNamespaceAndPath(
+                    id.getNamespace(), "textures/golem_material/" + id.getPath() + ".png");
+        }
+        return this;
+    }
+
+    @Override
+    public void generateAssets(KubeAssetGenerator generator) {
+        super.generateAssets(generator);
+        if (color != null && !customTexture) {
+            TextureColorizer.generate(generator, texture, COLOR_BASE, color, false);
+        }
     }
 
     public GolemMaterialBuilder itemColor(int color) {
@@ -105,6 +132,11 @@ public class GolemMaterialBuilder extends BuilderBase<GolemMaterial> {
         return this;
     }
 
+    public GolemMaterialBuilder antenna(boolean antenna) {
+        this.antenna = antenna;
+        return this;
+    }
+
     @Override
     public GolemMaterial createObject() {
         List<Holder<GolemTrait>> resolved = new ArrayList<>(traits.size());
@@ -114,13 +146,14 @@ public class GolemMaterialBuilder extends BuilderBase<GolemMaterial> {
         return new GolemMaterial(
                 research,
                 texture,
-                itemColor,
+                itemColor != null ? itemColor : color != null ? color : WHITE,
                 healthMod,
                 armor,
                 damage,
                 () -> stack(base),
                 () -> stack(mechanism),
-                resolved);
+                resolved,
+                antenna);
     }
 
     private static ItemStack stack(Identifier id) {

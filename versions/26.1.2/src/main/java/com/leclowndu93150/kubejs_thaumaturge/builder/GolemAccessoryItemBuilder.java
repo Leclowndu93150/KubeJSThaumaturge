@@ -19,9 +19,9 @@ public class GolemAccessoryItemBuilder extends ItemBuilder {
     public transient boolean killCredit;
     public transient @Nullable GolemAccessoryAnchor renderAnchor = GolemAccessoryAnchor.HEAD;
     public transient float renderX;
-    public transient float renderY = 0.3F;
+    public transient float renderY = 0.5F;
     public transient float renderZ;
-    public transient float renderScale = 0.25F;
+    public transient float renderScale = 0.42F;
     public transient float renderRotation;
     public transient @Nullable GolemAccessory accessory;
 

@@ -32,9 +32,10 @@ public interface ThaumaturgeEvents {
     EventHandler SPELL_CASTED = GROUP.server("spellCasted", () -> SpellCastKubeEvent.class);
     EventHandler SPELL_EFFECT =
             GROUP.server("spellEffect", () -> SpellEffectKubeEvent.class).hasResult();
-    EventHandler SPELL_NODE = GROUP.server("spellNode", () -> SpellNodeKubeEvent.class).hasResult();
-    TargetedEventHandler<String> SCRIPTED_SPELL = GROUP.server("scriptedSpell", () -> ScriptedSpellKubeEvent.class)
-            .requiredTarget(EventTargetType.STRING);
+    EventHandler SPELL_NODE =
+            GROUP.server("spellNode", () -> SpellNodeKubeEvent.class).hasResult();
+    TargetedEventHandler<String> SCRIPTED_SPELL =
+            GROUP.server("scriptedSpell", () -> ScriptedSpellKubeEvent.class).requiredTarget(EventTargetType.STRING);
     EventHandler SPELL_INSCRIBE =
             GROUP.server("spellInscribe", () -> SpellInscribeKubeEvent.class).hasResult();
 }

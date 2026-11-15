@@ -4,7 +4,7 @@ The addon exposes Thaumaturge's research, crafting and knowledge hooks as KubeJS
 
 ## Research
 
-The three research events can be cancelled, which makes the underlying action not happen.
+The three research events can be cancelled, which makes the underlying action not happen. To change a player's research yourself, use the [Research](bindings.md#research) binding.
 
 ```js
 ThaumaturgeEvents.researchUnlocked(event => {
@@ -98,6 +98,10 @@ Everything you can change:
 
 `event.paidFromWand` tells you whether the wand covers the whole cost, and `event.recipe` is the arcane recipe being priced.
 
+## Spells
+
+`spellCast`, `spellCasted`, `spellEffect`, `spellNode`, `spellInscribe` and `scriptedSpell` are covered on the [Spells](spells.md) page with examples.
+
 ## Cancelling
 
 ```js
@@ -120,3 +124,9 @@ ThaumaturgeEvents.researchCompleted(event => {
 | `crucibleCrafted` | `player`, `pos`, `result`, `aspects` | no |
 | `crucibleDecompose` | `player`, `pos`, `item`, `aspects` (settable) | yes |
 | `arcaneCraftCost` | `player`, `recipe`, `paidFromWand`, `wandCentivis`, `crystals`, `auraVis`, `affordable` (last four settable) | no |
+| `spellCast` | `entity`, `focus`, `spell`, `style`, `styleName`, `power` (settable), `visCost` (settable) | yes |
+| `spellCasted` | `entity`, `focus`, `spell`, `style`, `styleName` | no |
+| `spellEffect` | `level`, `caster`, `part`, `aspect`, `target`, `power` (settable) | yes |
+| `spellNode` | `level`, `caster`, `part`, `aspect`, `targets` | yes |
+| `spellInscribe` | `player`, `pos`, `focus`, `spell`, `summary`, `complexity`, `xp` | yes |
+| `scriptedSpell` | `key`, `caster`, `part`, `aspect`, `power`, `targets`, `getStat`/`setStat`; `stop()` and `proceedLater(ticks)` instead of cancel | no |

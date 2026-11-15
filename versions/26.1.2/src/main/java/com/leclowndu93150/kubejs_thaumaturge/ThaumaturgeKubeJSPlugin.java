@@ -4,8 +4,12 @@ import com.google.gson.JsonObject;
 import com.leclowndu93150.kubejs_thaumaturge.binding.AspectPoolsWrapper;
 import com.leclowndu93150.kubejs_thaumaturge.binding.DataMapsWrapper;
 import com.leclowndu93150.kubejs_thaumaturge.binding.EssentiaWrapper;
+import com.leclowndu93150.kubejs_thaumaturge.binding.MobTraitsWrapper;
+import com.leclowndu93150.kubejs_thaumaturge.binding.ResearchRequirements;
+import com.leclowndu93150.kubejs_thaumaturge.binding.ResearchWrapper;
 import com.leclowndu93150.kubejs_thaumaturge.binding.SpellsWrapper;
 import com.leclowndu93150.kubejs_thaumaturge.binding.VisRelayWrapper;
+import com.leclowndu93150.kubejs_thaumaturge.binding.WandVisWrapper;
 import com.leclowndu93150.kubejs_thaumaturge.builder.GolemAccessoryItemBuilder;
 import com.leclowndu93150.kubejs_thaumaturge.builder.GolemAddonBuilder;
 import com.leclowndu93150.kubejs_thaumaturge.builder.GolemArmBuilder;
@@ -14,6 +18,7 @@ import com.leclowndu93150.kubejs_thaumaturge.builder.GolemLegBuilder;
 import com.leclowndu93150.kubejs_thaumaturge.builder.GolemMaterialBuilder;
 import com.leclowndu93150.kubejs_thaumaturge.builder.GolemTraitBuilder;
 import com.leclowndu93150.kubejs_thaumaturge.builder.JarBlockBuilder;
+import com.leclowndu93150.kubejs_thaumaturge.builder.MobTraitBuilder;
 import com.leclowndu93150.kubejs_thaumaturge.builder.StabiliserBlockBuilder;
 import com.leclowndu93150.kubejs_thaumaturge.builder.WandCapBuilder;
 import com.leclowndu93150.kubejs_thaumaturge.builder.WandCapItemBuilder;
@@ -22,7 +27,7 @@ import com.leclowndu93150.kubejs_thaumaturge.builder.WandRodItemBuilder;
 import com.leclowndu93150.kubejs_thaumaturge.event.ThaumaturgeEvents;
 import com.leclowndu93150.kubejs_thaumaturge.recipe.ThaumaturgeRecipeComponents;
 import com.leclowndu93150.kubejs_thaumaturge.recipe.ThaumaturgeRecipeSchemas;
-import com.leclowndu93150.thaumaturge.TCIds;
+import com.leclowndu93150.thaumaturge.TTIds;
 import com.leclowndu93150.thaumaturge.api.aspect.AspectDataMaps;
 import com.leclowndu93150.thaumaturge.api.aspect.AspectIndexAccess;
 import com.leclowndu93150.thaumaturge.api.aspect.AspectList;
@@ -32,17 +37,22 @@ import com.leclowndu93150.thaumaturge.api.capability.KnowledgeAccess;
 import com.leclowndu93150.thaumaturge.api.golems.GolemHelper;
 import com.leclowndu93150.thaumaturge.api.items.GogglesAccess;
 import com.leclowndu93150.thaumaturge.api.items.RechargeAccess;
+import com.leclowndu93150.thaumaturge.api.labyrinth.LabyrinthEncounter;
 import com.leclowndu93150.thaumaturge.api.recipe.Blueprint;
 import com.leclowndu93150.thaumaturge.api.research.IResearchCategory;
 import com.leclowndu93150.thaumaturge.api.research.IResearchEntry;
 import com.leclowndu93150.thaumaturge.api.research.scan.ScanEntry;
+import com.leclowndu93150.thaumaturge.api.research.scan.ScanTarget;
 import com.leclowndu93150.thaumaturge.api.research.scan.ScanningManager;
 import com.leclowndu93150.thaumaturge.api.spell.affinity.AspectAffinity;
 import com.leclowndu93150.thaumaturge.api.spell.part.SpellPart;
 import com.leclowndu93150.thaumaturge.api.taint.TaintApi;
-import com.leclowndu93150.thaumaturge.api.wands.WandAccess;
 import com.leclowndu93150.thaumaturge.api.warp.WarpHelper;
 import com.leclowndu93150.thaumaturge.content.aspect.Aspect;
+import com.leclowndu93150.thaumaturge.content.eldritch.labyrinth.definition.LabyrinthDefinition;
+import com.leclowndu93150.thaumaturge.content.eldritch.labyrinth.definition.RoomType;
+import com.leclowndu93150.thaumaturge.content.eldritch.site.ObeliskSite;
+import com.leclowndu93150.thaumaturge.content.infusion.instability.InstabilityOutcome;
 import com.leclowndu93150.thaumaturge.content.pech.PechTradeTable;
 import com.leclowndu93150.thaumaturge.content.research.ResearchCategory;
 import com.leclowndu93150.thaumaturge.content.research.ResearchEntry;
@@ -56,10 +66,13 @@ import dev.latvian.mods.kubejs.registry.BuilderTypeRegistry;
 import dev.latvian.mods.kubejs.registry.RegistryObjectStorage;
 import dev.latvian.mods.kubejs.registry.ServerRegistryRegistry;
 import dev.latvian.mods.kubejs.script.BindingRegistry;
+import dev.latvian.mods.kubejs.script.ScriptManager;
 import dev.latvian.mods.kubejs.script.TypeWrapperRegistry;
 import dev.latvian.mods.rhino.type.TypeInfo;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ItemStackTemplate;
 
@@ -74,6 +87,7 @@ public class ThaumaturgeKubeJSPlugin implements KubeJSPlugin {
         registry.addDefault(GolemArmBuilder.REGISTRY, GolemArmBuilder.class, GolemArmBuilder::new);
         registry.addDefault(GolemLegBuilder.REGISTRY, GolemLegBuilder.class, GolemLegBuilder::new);
         registry.addDefault(GolemAddonBuilder.REGISTRY, GolemAddonBuilder.class, GolemAddonBuilder::new);
+        registry.addDefault(MobTraitBuilder.REGISTRY, MobTraitBuilder.class, MobTraitBuilder::new);
         registry.of(Registries.BLOCK, reg -> {
             reg.add(Identifier.fromNamespaceAndPath("thaumaturge", "jar"), JarBlockBuilder.class, JarBlockBuilder::new);
             reg.add(
@@ -107,6 +121,11 @@ public class ThaumaturgeKubeJSPlugin implements KubeJSPlugin {
         registry.register(PechTradeTable.REGISTRY_KEY, PechTradeTable.CODEC, PechTradeTable.class);
         registry.register(SpellPart.REGISTRY_KEY, SpellPart.CODEC, SpellPart.class);
         registry.register(AspectAffinity.REGISTRY_KEY, AspectAffinity.CODEC, AspectAffinity.class);
+        registry.register(LabyrinthEncounter.REGISTRY_KEY, LabyrinthEncounter.DIRECT_CODEC, LabyrinthEncounter.class);
+        registry.register(RoomType.REGISTRY_KEY, RoomType.CODEC, RoomType.class);
+        registry.register(LabyrinthDefinition.REGISTRY_KEY, LabyrinthDefinition.CODEC, LabyrinthDefinition.class);
+        registry.register(ObeliskSite.REGISTRY_KEY, ObeliskSite.CODEC, ObeliskSite.class);
+        registry.register(InstabilityOutcome.REGISTRY_KEY, InstabilityOutcome.CODEC, InstabilityOutcome.class);
     }
 
     @Override
@@ -119,15 +138,15 @@ public class ThaumaturgeKubeJSPlugin implements KubeJSPlugin {
 
     @Override
     public void registerRecipeSchemas(RecipeSchemaRegistry registry) {
-        registry.register(TCIds.rl("crucible"), ThaumaturgeRecipeSchemas.CRUCIBLE);
-        registry.register(TCIds.rl("infusion"), ThaumaturgeRecipeSchemas.INFUSION);
-        registry.register(TCIds.rl("infusion_enchantment"), ThaumaturgeRecipeSchemas.INFUSION_ENCHANTMENT);
-        registry.register(TCIds.rl("arcane_workbench_shapeless"), ThaumaturgeRecipeSchemas.ARCANE_SHAPELESS);
-        registry.register(TCIds.rl("arcane_workbench_shaped"), ThaumaturgeRecipeSchemas.ARCANE_SHAPED);
-        registry.register(TCIds.rl("infusion_patch"), ThaumaturgeRecipeSchemas.INFUSION_PATCH);
-        registry.register(TCIds.rl("dust_trigger_simple"), ThaumaturgeRecipeSchemas.DUST_TRIGGER_SIMPLE);
-        registry.register(TCIds.rl("dust_trigger_tag"), ThaumaturgeRecipeSchemas.DUST_TRIGGER_TAG);
-        registry.register(TCIds.rl("dust_trigger_multiblock"), ThaumaturgeRecipeSchemas.DUST_TRIGGER_MULTIBLOCK);
+        registry.register(TTIds.rl("crucible"), ThaumaturgeRecipeSchemas.CRUCIBLE);
+        registry.register(TTIds.rl("infusion"), ThaumaturgeRecipeSchemas.INFUSION);
+        registry.register(TTIds.rl("infusion_enchantment"), ThaumaturgeRecipeSchemas.INFUSION_ENCHANTMENT);
+        registry.register(TTIds.rl("arcane_workbench_shapeless"), ThaumaturgeRecipeSchemas.ARCANE_SHAPELESS);
+        registry.register(TTIds.rl("arcane_workbench_shaped"), ThaumaturgeRecipeSchemas.ARCANE_SHAPED);
+        registry.register(TTIds.rl("infusion_patch"), ThaumaturgeRecipeSchemas.INFUSION_PATCH);
+        registry.register(TTIds.rl("dust_trigger_simple"), ThaumaturgeRecipeSchemas.DUST_TRIGGER_SIMPLE);
+        registry.register(TTIds.rl("dust_trigger_tag"), ThaumaturgeRecipeSchemas.DUST_TRIGGER_TAG);
+        registry.register(TTIds.rl("dust_trigger_multiblock"), ThaumaturgeRecipeSchemas.DUST_TRIGGER_MULTIBLOCK);
     }
 
     @Override
@@ -144,6 +163,26 @@ public class ThaumaturgeKubeJSPlugin implements KubeJSPlugin {
                     }
                     return new ItemStackTemplate(stack.typeHolder(), stack.getCount(), stack.getComponentsPatch());
                 });
+        registry.register(ScanTarget.class, (TypeWrapperRegistry.ContextFromFunction<ScanTarget>) (cx, o) -> {
+            if (o instanceof ScanTarget target) {
+                return target;
+            }
+            if (o instanceof Entity entity) {
+                return ScanTarget.entity(entity);
+            }
+            if (o instanceof BlockPos pos) {
+                return ScanTarget.block(pos);
+            }
+            if (o instanceof ItemStack stack) {
+                return ScanTarget.stack(stack);
+            }
+            return ScanTarget.stack((ItemStack) cx.jsToJava(o, TypeInfo.of(ItemStack.class)));
+        });
+    }
+
+    @Override
+    public void beforeScriptsLoaded(ScriptManager manager) {
+        ResearchRequirements.clear(manager.scriptType);
     }
 
     @Override
@@ -160,8 +199,9 @@ public class ThaumaturgeKubeJSPlugin implements KubeJSPlugin {
         bindings.add("AspectPools", AspectPoolsWrapper.class);
         bindings.add("AspectDataMaps", AspectDataMaps.class);
         bindings.add("ThaumaturgeData", DataMapsWrapper.class);
+        bindings.add("Research", ResearchWrapper.class);
         bindings.add("Knowledge", KnowledgeAccess.class);
-        bindings.add("WandVis", WandAccess.class);
+        bindings.add("WandVis", WandVisWrapper.class);
         bindings.add("Essentia", EssentiaWrapper.class);
         bindings.add("VisRelay", VisRelayWrapper.class);
         bindings.add("Recharge", RechargeAccess.class);
@@ -169,6 +209,7 @@ public class ThaumaturgeKubeJSPlugin implements KubeJSPlugin {
         bindings.add("Scanning", ScanningManager.class);
         bindings.add("Golems", GolemHelper.class);
         bindings.add("Spells", SpellsWrapper.class);
+        bindings.add("MobTraits", MobTraitsWrapper.class);
     }
 
     @Override

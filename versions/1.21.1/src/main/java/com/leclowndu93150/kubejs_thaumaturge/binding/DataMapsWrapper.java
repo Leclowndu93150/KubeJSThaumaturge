@@ -34,6 +34,22 @@ public final class DataMapsWrapper {
         event.json(ResourceLocation.fromNamespaceAndPath("thaumaturge", "data_maps/item/warp"), file);
     }
 
+    public static void taintedProfile(KubeDataGenerator event, Map<String, JsonElement> entries) {
+        write(event, "entity_type", "tainted_profile", entries);
+    }
+
+    public static void trimBonus(KubeDataGenerator event, Map<String, JsonElement> entries) {
+        write(event, "trim_material", "trim_bonus", entries);
+    }
+
+    public static void spellFocus(KubeDataGenerator event, Map<String, JsonElement> entries) {
+        write(event, "item", "spell_focus", entries);
+    }
+
+    public static void smelterStats(KubeDataGenerator event, Map<String, JsonElement> entries) {
+        write(event, "block", "smelter_stats", entries);
+    }
+
     private static void write(KubeDataGenerator event, String kind, String name, Map<String, JsonElement> entries) {
         JsonObject values = new JsonObject();
         entries.forEach(values::add);
